@@ -1,0 +1,7 @@
+com\eventosfull\fullapi\Controller\EventoControllerIT.class
+com\eventosfull\fullapi\Controller\UsuarioControllerIT.class
+com\eventosfull\fullapi\Controller\CheckinControllerIT.class
+com\eventosfull\fullapi\Controller\InscricaoControllerIT.class
+com\eventosfull\fullapi\FullapiApplicationTests.class
+com\eventosfull\fullapi\Controller\InscricaoPorUsuarioControllerIT.class
+com\eventosfull\fullapi\Controller\LoginControllerIT.class
