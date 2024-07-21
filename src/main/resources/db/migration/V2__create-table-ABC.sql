@@ -1,0 +1,4 @@
+CREATE TABLE ABC (
+    id SERIAL PRIMARY KEY,
+    descricao TEXT NOT NULL
+);

@@ -1,0 +1,30 @@
+package com.eventosfull.fullapi.model;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import lombok.Data;
+
+@Entity
+@Data
+public class Usuarios {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String nome;
+    private String login;
+    private String email;
+    private String senha;
+
+    public Usuarios() {}
+
+    public Usuarios(String nome, String login, String email, String senha) {
+        this.nome = nome;
+        this.login = login;
+        this.email = email;
+        this.senha = senha;
+    }
+}
