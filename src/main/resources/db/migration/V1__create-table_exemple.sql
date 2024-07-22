@@ -1,4 +1,0 @@
-CREATE TABLE EXEMPLO (
-    id SERIAL PRIMARY KEY,
-    descricao TEXT NOT NULL
-);
