@@ -1,82 +1,84 @@
 package com.eventosfull.fullapi.Controller;
 
-import com.eventosfull.fullapi.model.Usuarios;
-import java.util.List;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-/**
- *
- * @author Rafae
- */
+import com.eventosfull.fullapi.model.Usuarios;
+import com.eventosfull.fullapi.repository.UsuarioRepository;
+import com.eventosfull.fullapi.service.LoggerService;
+
 public class UsuarioControllerIT {
-    
-    public UsuarioControllerIT() {
-    }
-    
-    @BeforeAll
-    public static void setUpClass() {
-    }
-    
-    @AfterAll
-    public static void tearDownClass() {
-    }
-    
+
+    @InjectMocks
+    private UsuarioController usuarioController;
+
+    @Mock
+    private UsuarioRepository usuarioRepository;
+
+    @Mock
+    private LoggerService loggerService;
+
     @BeforeEach
     public void setUp() {
-    }
-    
-    @AfterEach
-    public void tearDown() {
+        MockitoAnnotations.openMocks(this);
     }
 
-    /**
-     * Test of listaUsuarios method, of class UsuarioController.
-     */
     @Test
     public void testListaUsuarios() {
-        System.out.println("listaUsuarios");
-        UsuarioController instance = new UsuarioController();
-        ResponseEntity<List<Usuarios>> expResult = null;
-        ResponseEntity<List<Usuarios>> result = instance.listaUsuarios();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        List<Usuarios> usuarios = Arrays.asList(new Usuarios(), new Usuarios());
+
+        when(usuarioRepository.findAll()).thenReturn(usuarios);
+
+        ResponseEntity<List<Usuarios>> response = usuarioController.listaUsuarios();
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(2, response.getBody().size());
+        verify(loggerService, times(1)).log(anyString(), anyString());
     }
 
-    /**
-     * Test of adicionar method, of class UsuarioController.
-     */
     @Test
     public void testAdicionar() {
-        System.out.println("adicionar");
-        Usuarios usuario = null;
-        UsuarioController instance = new UsuarioController();
-        Usuarios expResult = null;
-        Usuarios result = instance.adicionar(usuario);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        Usuarios usuario = new Usuarios();
+        usuario.setNome("Test User");
+
+        when(usuarioRepository.save(usuario)).thenReturn(usuario);
+
+        Usuarios result = usuarioController.adicionar(usuario);
+
+        assertEquals("Test User", result.getNome());
+        verify(usuarioRepository, times(1)).save(usuario);
+        verify(loggerService, times(1)).log(anyString(), anyString());
     }
 
-    /**
-     * Test of buscarUsuarioPorId method, of class UsuarioController.
-     */
     @Test
     public void testBuscarUsuarioPorId() {
-        System.out.println("buscarUsuarioPorId");
-        Long id = null;
-        UsuarioController instance = new UsuarioController();
-        ResponseEntity<Usuarios> expResult = null;
-        ResponseEntity<Usuarios> result = instance.buscarUsuarioPorId(id);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        Long id = 1L;
+        Usuarios usuario = new Usuarios();
+        usuario.setId(id);
+
+        when(usuarioRepository.findById(id)).thenReturn(Optional.of(usuario));
+
+        ResponseEntity<Usuarios> response = usuarioController.buscarUsuarioPorId(id);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(usuario, response.getBody());
+        verify(loggerService, times(1)).log(anyString(), anyString());
+
+        when(usuarioRepository.findById(id)).thenReturn(Optional.empty());
+        ResponseEntity<Usuarios> responseNotFound = usuarioController.buscarUsuarioPorId(id);
+        assertEquals(HttpStatus.NOT_FOUND, responseNotFound.getStatusCode());
+        verify(loggerService, times(2)).log(anyString(), anyString());
     }
-    
 }

@@ -1,72 +1,78 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/UnitTests/JUnit5TestClass.java to edit this template
- */
 package com.eventosfull.fullapi.Controller;
 
-import com.eventosfull.fullapi.model.Inscricao;
-import java.util.List;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.Arrays;
+import java.util.List;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-/**
- *
- * @author Rafae
- */
+import com.eventosfull.fullapi.model.Inscricao;
+import com.eventosfull.fullapi.repository.InscricaoRepository;
+import com.eventosfull.fullapi.service.LoggerService;
+
 public class InscricaoPorUsuarioControllerIT {
-    
-    public InscricaoPorUsuarioControllerIT() {
-    }
-    
-    @BeforeAll
-    public static void setUpClass() {
-    }
-    
-    @AfterAll
-    public static void tearDownClass() {
-    }
-    
+
+    @InjectMocks
+    private InscricaoPorUsuarioController inscricaoPorUsuarioController;
+
+    @Mock
+    private InscricaoRepository inscricaoRepository;
+
+    @Mock
+    private LoggerService loggerService;
+
     @BeforeEach
     public void setUp() {
-    }
-    
-    @AfterEach
-    public void tearDown() {
+        MockitoAnnotations.openMocks(this);
     }
 
-    /**
-     * Test of buscarInscricoesPorUsuarioId method, of class InscricaoPorUsuarioController.
-     */
     @Test
     public void testBuscarInscricoesPorUsuarioId() {
-        System.out.println("buscarInscricoesPorUsuarioId");
-        Long id_usuario = null;
-        InscricaoPorUsuarioController instance = new InscricaoPorUsuarioController();
-        ResponseEntity<List<Inscricao>> expResult = null;
-        ResponseEntity<List<Inscricao>> result = instance.buscarInscricoesPorUsuarioId(id_usuario);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        Long idUsuario = 1L;
+        Inscricao inscricao1 = new Inscricao();
+        Inscricao inscricao2 = new Inscricao();
+        List<Inscricao> inscricoes = Arrays.asList(inscricao1, inscricao2);
+
+        when(inscricaoRepository.findByIdUsuario(idUsuario)).thenReturn(inscricoes);
+
+        ResponseEntity<List<Inscricao>> response = inscricaoPorUsuarioController.buscarInscricoesPorUsuarioId(idUsuario);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(2, response.getBody().size());
+        verify(loggerService, times(1)).log(anyString(), anyString());
+
+        when(inscricaoRepository.findByIdUsuario(idUsuario)).thenReturn(Arrays.asList());
+        ResponseEntity<List<Inscricao>> responseNoContent = inscricaoPorUsuarioController.buscarInscricoesPorUsuarioId(idUsuario);
+        assertEquals(HttpStatus.NO_CONTENT, responseNoContent.getStatusCode());
+        verify(loggerService, times(2)).log(anyString(), anyString());
     }
 
-    /**
-     * Test of deletarInscricaoPorIdUsuario method, of class InscricaoPorUsuarioController.
-     */
     @Test
     public void testDeletarInscricaoPorIdUsuario() {
-        System.out.println("deletarInscricaoPorIdUsuario");
-        Long id_usuario = null;
-        InscricaoPorUsuarioController instance = new InscricaoPorUsuarioController();
-        ResponseEntity expResult = null;
-        ResponseEntity result = instance.deletarInscricaoPorIdUsuario(id_usuario);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        Long idUsuario = 1L;
+        Inscricao inscricao1 = new Inscricao();
+        Inscricao inscricao2 = new Inscricao();
+        List<Inscricao> inscricoes = Arrays.asList(inscricao1, inscricao2);
+
+        when(inscricaoRepository.findByIdUsuario(idUsuario)).thenReturn(inscricoes);
+
+        ResponseEntity<?> response = inscricaoPorUsuarioController.deletarInscricaoPorIdUsuario(idUsuario);
+
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        verify(inscricaoRepository, times(1)).deleteAll(inscricoes);
+        verify(loggerService, times(1)).log(anyString(), anyString());
+
+        when(inscricaoRepository.findByIdUsuario(idUsuario)).thenReturn(Arrays.asList());
+        ResponseEntity<?> responseNotFound = inscricaoPorUsuarioController.deletarInscricaoPorIdUsuario(idUsuario);
+        assertEquals(HttpStatus.NOT_FOUND, responseNotFound.getStatusCode());
+        verify(loggerService, times(2)).log(anyString(), anyString());
     }
-    
 }

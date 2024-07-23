@@ -1,56 +1,86 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/UnitTests/JUnit5TestClass.java to edit this template
- */
 package com.eventosfull.fullapi.Controller;
 
-import com.eventosfull.fullapi.model.Usuarios;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-/**
- *
- * @author Rafae
- */
+import com.eventosfull.fullapi.model.Usuarios;
+import com.eventosfull.fullapi.repository.UsuarioRepository;
+import com.eventosfull.fullapi.service.LoggerService;
+
 public class LoginControllerIT {
-    
-    public LoginControllerIT() {
-    }
-    
-    @BeforeAll
-    public static void setUpClass() {
-    }
-    
-    @AfterAll
-    public static void tearDownClass() {
-    }
-    
+
+    @InjectMocks
+    private LoginController loginController;
+
+    @Mock
+    private UsuarioRepository usuarioRepository;
+
+    @Mock
+    private LoggerService loggerService;
+
     @BeforeEach
     public void setUp() {
-    }
-    
-    @AfterEach
-    public void tearDown() {
+        MockitoAnnotations.openMocks(this);
     }
 
-    /**
-     * Test of login method, of class LoginController.
-     */
     @Test
-    public void testLogin() {
-        System.out.println("login");
-        Usuarios usuario = null;
-        LoginController instance = new LoginController();
-        ResponseEntity<String> expResult = null;
-        ResponseEntity<String> result = instance.login(usuario);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+    public void testLoginSuccess() {
+        Usuarios usuario = new Usuarios();
+        usuario.setLogin("user1");
+        usuario.setSenha("password1");
+
+        Usuarios usuarioEncontrado = new Usuarios();
+        usuarioEncontrado.setLogin("user1");
+        usuarioEncontrado.setSenha("password1");
+
+        when(usuarioRepository.findByLogin("user1")).thenReturn(usuarioEncontrado);
+
+        ResponseEntity<String> response = loginController.login(usuario);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("Login bem-sucedido", response.getBody());
+        verify(loggerService, times(1)).log(anyString(), anyString());
     }
-    
+
+    @Test
+    public void testLoginFailure() {
+        Usuarios usuario = new Usuarios();
+        usuario.setLogin("user1");
+        usuario.setSenha("wrongpassword");
+
+        Usuarios usuarioEncontrado = new Usuarios();
+        usuarioEncontrado.setLogin("user1");
+        usuarioEncontrado.setSenha("password1");
+
+        when(usuarioRepository.findByLogin("user1")).thenReturn(usuarioEncontrado);
+
+        ResponseEntity<String> response = loginController.login(usuario);
+
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+        assertEquals("Login ou senha incorretos", response.getBody());
+        verify(loggerService, times(1)).log(anyString(), anyString());
+    }
+
+    @Test
+    public void testLoginUserNotFound() {
+        Usuarios usuario = new Usuarios();
+        usuario.setLogin("user1");
+        usuario.setSenha("password1");
+
+        when(usuarioRepository.findByLogin("user1")).thenReturn(null);
+
+        ResponseEntity<String> response = loginController.login(usuario);
+
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+        assertEquals("Login ou senha incorretos", response.getBody());
+        verify(loggerService, times(1)).log(anyString(), anyString());
+    }
 }

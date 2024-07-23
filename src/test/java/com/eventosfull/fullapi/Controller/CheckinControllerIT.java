@@ -1,71 +1,76 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/UnitTests/JUnit5TestClass.java to edit this template
- */
 package com.eventosfull.fullapi.Controller;
 
-import com.eventosfull.fullapi.model.Checkin;
-import java.util.List;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.Arrays;
+import java.util.List;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-/**
- *
- * @author Rafae
- */
+import com.eventosfull.fullapi.model.Checkin;
+import com.eventosfull.fullapi.repository.CheckinRepository;
+import com.eventosfull.fullapi.service.LoggerService;
+
 public class CheckinControllerIT {
-    
-    public CheckinControllerIT() {
-    }
-    
-    @BeforeAll
-    public static void setUpClass() {
-    }
-    
-    @AfterAll
-    public static void tearDownClass() {
-    }
-    
+
+    @InjectMocks
+    private CheckinController checkinController; // Instância real do controlador, com injeção dos mocks
+
+    @Mock
+    private CheckinRepository checkinRepository; // Mock do repositório de check-ins
+
+    @Mock
+    private LoggerService loggerService; // Mock do serviço de logger
+
     @BeforeEach
     public void setUp() {
-    }
-    
-    @AfterEach
-    public void tearDown() {
+        MockitoAnnotations.openMocks(this); // Inicializa os mocks antes de cada teste
     }
 
-    /**
-     * Test of listaCheckin method, of class CheckinController.
-     */
     @Test
     public void testListaCheckin() {
-        System.out.println("listaCheckin");
-        CheckinController instance = new CheckinController();
-        ResponseEntity<List<Checkin>> expResult = null;
-        ResponseEntity<List<Checkin>> result = instance.listaCheckin();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        // Cria dois objetos de Checkin para simular dados de check-ins no repositório
+        Checkin checkin1 = new Checkin();
+        Checkin checkin2 = new Checkin();
+        List<Checkin> checkins = Arrays.asList(checkin1, checkin2);
+
+        // Configura o mock do repositório para retornar a lista de check-ins
+        when(checkinRepository.findAll()).thenReturn(checkins);
+
+        // Chama o método do controlador
+        ResponseEntity<List<Checkin>> response = checkinController.listaCheckin();
+
+        // Verifica se o status da resposta é OK (200)
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        // Verifica se o corpo da resposta contém dois check-ins
+        assertEquals(2, response.getBody().size());
+        // Verifica se o método log do LoggerService foi chamado uma vez
+        verify(loggerService, times(1)).log(anyString(), anyString());
     }
 
-    /**
-     * Test of adicionar method, of class CheckinController.
-     */
     @Test
     public void testAdicionar() {
-        System.out.println("adicionar");
-        Checkin checkin = null;
-        CheckinController instance = new CheckinController();
-        Checkin expResult = null;
-        Checkin result = instance.adicionar(checkin);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        // Cria um objeto Checkin para ser adicionado
+        Checkin checkin = new Checkin();
+        
+        // Configura o mock do repositório para retornar o mesmo objeto checkin quando o método save é chamado
+        when(checkinRepository.save(checkin)).thenReturn(checkin);
+
+        // Chama o método do controlador
+        Checkin novoCheckin = checkinController.adicionar(checkin);
+
+        // Verifica se o objeto retornado não é nulo
+        assertNotNull(novoCheckin);
+        // Verifica se o método save do repositório foi chamado uma vez
+        verify(checkinRepository, times(1)).save(checkin);
+        // Verifica se o método log do LoggerService foi chamado uma vez
+        verify(loggerService, times(1)).log(anyString(), anyString());
     }
-    
 }
