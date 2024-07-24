@@ -23,7 +23,7 @@ public class UsuarioController {
     private UsuarioRepository usuarioRepository;
 
     @Autowired
-    private LoggerService loggerService; // Injetando o serviço de log
+    private LoggerService loggerService; 
 
     @GetMapping
     public ResponseEntity<List<Usuarios>> listaUsuarios() {
