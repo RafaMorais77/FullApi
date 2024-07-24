@@ -22,7 +22,7 @@ public class Usuarios {
     
     
     @Transient
-    private String cor = "azul";
+    private String cor = "vermelho";
 
     public Usuarios() {}
 
