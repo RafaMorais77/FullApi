@@ -4,6 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Transient;
 import lombok.Data;
 
 @Entity
@@ -18,6 +19,10 @@ public class Usuarios {
     private String login;
     private String email;
     private String senha;
+    
+    
+    @Transient
+    private String cor = "azul";
 
     public Usuarios() {}
 
